@@ -1,0 +1,4 @@
+interface:
+  display_name: "PyNVMe Script Builder"
+  short_description: "Build PyNVMe3 scripts through evidence and review gates."
+  default_prompt: "Use $pynvme-script-builder to convert a test source or continue an Engineer-adopted AI-TF handoff, regenerate a formal flow when needed, pass SPEC and TEST_REVIEWER gates, and build a PyNVMe3 pytest script."

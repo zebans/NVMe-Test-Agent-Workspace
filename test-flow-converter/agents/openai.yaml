@@ -1,0 +1,4 @@
+interface:
+  display_name: "Test Flow Converter"
+  short_description: "Convert scripts, CSV, IOL, and prose into validated test flows."
+  default_prompt: "Use $test-flow-converter to convert this test source into a standardized test flow."

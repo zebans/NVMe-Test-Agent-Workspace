@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FWUpdateCA0 - SPEC Reasoning Map</title>
+  <style>
+    :root {
+      --navy: #173a55;
+      --teal: #087a76;
+      --paper: #f4f7f9;
+      --white: #ffffff;
+      --ink: #1d2a36;
+      --muted: #607182;
+      --line: #d6e0e7;
+      --blue: #246b9e;
+      --blue-soft: #edf6fc;
+      --green: #187a39;
+      --green-soft: #eaf8ed;
+      --amber: #9a5b00;
+      --amber-soft: #fff7e6;
+      --gray: #657485;
+      --gray-soft: #edf1f4;
+      --red: #b42318;
+      --red-soft: #fff0ee;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font: 15px/1.6 "Segoe UI", "Microsoft JhengHei", Arial, sans-serif;
+    }
+    header {
+      padding: 34px max(24px, calc((100% - 1080px) / 2));
+      color: var(--white);
+      background: var(--navy);
+      border-bottom: 5px solid var(--teal);
+    }
+    .eyebrow {
+      color: #9fdad6;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    h1 { margin: 4px 0 6px; font-size: 30px; letter-spacing: 0; }
+    header p { margin: 0; color: #dce7ef; }
+    main { max-width: 1080px; margin: auto; padding: 26px 24px 54px; }
+    .overview {
+      padding: 22px;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 7px;
+    }
+    .section-label {
+      margin-bottom: 3px;
+      color: var(--teal);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    h2 { margin: 0 0 14px; color: var(--navy); font-size: 22px; }
+    h3 { margin: 0; color: var(--navy); font-size: 17px; }
+    p { margin: 8px 0; }
+    .purpose {
+      margin-top: 16px;
+      padding: 13px 15px;
+      background: #f7fafb;
+      border-left: 4px solid var(--teal);
+    }
+    .purpose b { display: block; margin-bottom: 3px; color: var(--navy); }
+    details {
+      margin-top: 18px;
+      overflow: hidden;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 7px;
+    }
+    summary {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 16px;
+      padding: 15px 18px;
+      color: var(--navy);
+      background: #edf3f7;
+      cursor: pointer;
+      font-weight: 700;
+    }
+    summary::marker { color: var(--teal); }
+    summary small { color: var(--muted); font-weight: 400; }
+    .map { padding: 24px 28px 30px; }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 18px;
+      margin-bottom: 25px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .legend i { width: 10px; height: 10px; border-radius: 2px; }
+    .legend .spec { background: var(--blue); }
+    .legend .infer { background: var(--green); }
+    .legend .unknown { background: #d69622; }
+    .legend .nonspec { background: #83919e; }
+    .map-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 14px;
+      margin: -8px 0 24px;
+      padding-bottom: 13px;
+      border-bottom: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .map-actions { display: flex; gap: 7px; }
+    .map-actions button {
+      padding: 6px 10px;
+      color: var(--navy);
+      background: var(--white);
+      border: 1px solid #b9cbd6;
+      border-radius: 4px;
+      cursor: pointer;
+      font: 700 12px "Segoe UI", "Microsoft JhengHei", Arial, sans-serif;
+    }
+    .map-actions button:hover { background: #edf3f7; }
+    .map-actions button:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+    .flow-list { position: relative; margin: 0; padding: 0; list-style: none; }
+    .flow-list::before {
+      position: absolute;
+      top: 22px;
+      bottom: 26px;
+      left: 15px;
+      width: 2px;
+      background: #b9cbd6;
+      content: "";
+    }
+    .flow-node { position: relative; padding: 0 0 34px 48px; }
+    .flow-node:last-child { padding-bottom: 0; }
+    .flow-node:not(:last-child)::after {
+      position: absolute;
+      bottom: 18px;
+      left: 10px;
+      width: 0;
+      height: 0;
+      border-top: 8px solid #7da4b8;
+      border-right: 6px solid transparent;
+      border-left: 6px solid transparent;
+      content: "";
+    }
+    details.node-details {
+      margin: 0;
+      overflow: visible;
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+    }
+    details.node-details > summary.node-title {
+      display: flex;
+      justify-content: flex-start;
+      padding: 0 0 7px;
+      background: transparent;
+      border-bottom: 1px solid var(--line);
+    }
+    details.node-details > summary.node-title::marker { color: var(--teal); }
+    .node-content { padding-top: 1px; }
+    .node-index {
+      position: absolute;
+      top: 1px;
+      left: 0;
+      display: grid;
+      width: 32px;
+      height: 32px;
+      place-items: center;
+      color: var(--white);
+      background: var(--teal);
+      border: 3px solid var(--white);
+      border-radius: 50%;
+      box-shadow: 0 0 0 1px #a9c4ce;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .node-title {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      min-height: 32px;
+      padding-bottom: 7px;
+      border-bottom: 1px solid var(--line);
+    }
+    .tree { margin-top: 9px; padding-left: 0; list-style: none; }
+    .tree > li {
+      position: relative;
+      margin: 7px 0;
+      padding-left: 23px;
+    }
+    .tree > li::before {
+      position: absolute;
+      top: 0;
+      left: 4px;
+      color: #7e919f;
+      font-family: Consolas, monospace;
+      content: "\251C\2500";
+    }
+    .tree > li:last-child::before { content: "\2514\2500"; }
+    code {
+      padding: 1px 5px;
+      color: #29455e;
+      background: #edf3f7;
+      border-radius: 3px;
+      font: 12px Consolas, monospace;
+    }
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .tag.spec { color: #205f8d; background: var(--blue-soft); }
+    .tag.infer { color: #176c35; background: var(--green-soft); }
+    .tag.unknown { color: var(--amber); background: var(--amber-soft); }
+    .tag.nonspec { color: #566675; background: var(--gray-soft); }
+    .unknown-field {
+      padding-bottom: 1px;
+      border-bottom: 2px solid #d69622;
+      font-weight: 600;
+    }
+    .reasoning {
+      margin: 8px 0 10px 23px;
+      padding: 10px 13px;
+      color: #275438;
+      background: var(--green-soft);
+      border-left: 4px solid var(--green);
+    }
+    .reasoning b { color: var(--green); }
+    .reasoning-path {
+      margin-top: 5px;
+      color: #3b6350;
+      font-size: 13px;
+    }
+    .spec-fact {
+      margin: 8px 0 10px 23px;
+      padding: 10px 13px;
+      color: #28516f;
+      background: var(--blue-soft);
+      border-left: 4px solid var(--blue);
+    }
+    .spec-fact b { color: var(--blue); }
+    .no-spec {
+      margin: 8px 0 10px 23px;
+      padding: 10px 13px;
+      color: #566675;
+      background: var(--gray-soft);
+      border-left: 4px solid #83919e;
+    }
+    .spec-index {
+      margin-top: 13px;
+      padding-top: 11px;
+      border-top: 1px dashed #b9cbd6;
+    }
+    .spec-index-title {
+      margin-bottom: 7px;
+      color: var(--navy);
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .index-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .index-table th,
+    .index-table td {
+      padding: 7px 8px;
+      border: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+    .index-table th {
+      color: #36516a;
+      background: #edf3f7;
+    }
+    .formula {
+      display: block;
+      margin-top: 6px;
+      color: #214d34;
+      font-family: Consolas, monospace;
+      font-size: 12px;
+    }
+    footer { padding-top: 18px; color: var(--muted); font-size: 12px; text-align: center; }
+    @media (max-width: 680px) {
+      header { padding: 25px 20px; }
+      main { padding: 18px 14px 40px; }
+      .map { padding: 20px 16px 26px; }
+      summary { align-items: flex-start; flex-direction: column; }
+      .map-toolbar { align-items: flex-start; flex-direction: column; }
+      .flow-node { padding-left: 43px; }
+      .reasoning, .spec-fact, .no-spec { margin-left: 0; }
+    }
+    @media print {
+      body { background: var(--white); }
+      header { padding: 22px; }
+      main { padding: 16px; }
+      details { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="eyebrow">SPEC Evidence Report</div>
+    <h1>Test Flow to SPEC Reasoning Map</h1>
+    <p>從原始 Test Flow Behavior 出發，標記 SPEC 可直接對應的內容，以及需要 SPEC_AGENT 推斷的 command、parameter 與平台行為。</p>
+  </header>
+
+  <main>
+    <section class="overview">
+      <div class="section-label">Test Flow Overview</div>
+      <h2>FWUpdateCA0</h2>
+      <div class="purpose">
+        <b>Test Purpose</b>
+        使用不同的 firmware transfer length，將 <code>FW/CA.bin</code> 下載至 controller，接著以 <code>Firmware Commit CA=0</code> 將 firmware image 寫入指定的 firmware slot，觀察不同 transfer length 與 target slot 組合下的 command behavior。
+      </div>
+
+      <details open>
+        <summary>
+          <span>Main Behaviors</span>
+        </summary>
+        <div class="map">
+          <div class="legend">
+            <span><i class="spec"></i>SPEC 直接對應</span>
+            <span><i class="infer"></i>SPEC_AGENT 推斷</span>
+            <span><i class="unknown"></i>來源名稱需要解讀</span>
+            <span><i class="nonspec"></i>非 SPEC 行為</span>
+          </div>
+          <div class="map-toolbar">
+            <div class="map-actions">
+              <button type="button" id="expand-all">全部展開</button>
+              <button type="button" id="collapse-all">全部收起</button>
+            </div>
+          </div>
+
+          <ol class="flow-list">
+            <li class="flow-node">
+              <span class="node-index">01</span>
+              <details class="node-details">
+              <summary class="node-title">
+                <h3>Environment Preparation</h3>
+                <span class="tag unknown">需要解讀</span>
+              </summary>
+              <div class="node-content">
+              <ul class="tree">
+                <li><span class="unknown-field">PreTest</span> <span class="tag unknown">SPEC 未直接辨識</span></li>
+              </ul>
+              <div class="reasoning">
+                <b>Agent 推斷</b><br>
+                <code>PreTest</code> 應為測試平台的環境初始化行為，不是 NVMe command。它可能包含 controller 初始化、fixture 準備或先前狀態清理，但來源沒有提供實際內容。
+                <div class="reasoning-path">Behavior name → Test setup context → Test-platform action</div>
+              </div>
+              <div class="spec-index">
+                <div class="spec-index-title">SPEC Index</div>
+                <table class="index-table">
+                  <thead><tr><th>SPEC Reference</th><th>Result</th></tr></thead>
+                  <tbody><tr><td>Direct SPEC reference</td><td>None. <code>PreTest</code> is interpreted as a test-platform preparation behavior.</td></tr></tbody>
+                </table>
+              </div>
+              </div>
+              </details>
+            </li>
+
+            <li class="flow-node">
+              <span class="node-index">02</span>
+              <details class="node-details">
+              <summary class="node-title">
+                <h3>Firmware Image Download</h3>
+                <span class="tag spec">SPEC Command</span>
+              </summary>
+              <div class="node-content">
+              <ul class="tree">
+                <li><span class="unknown-field">CMD: FwDownload</span> <span class="tag infer">Command mapping</span></li>
+              </ul>
+              <div class="reasoning">
+                <b>Agent 推斷</b><br>
+                <code>FwDownload</code> 並非 SPEC 的正式 command 名稱；根據 firmware image、輸入檔案與 transfer length，推斷其對應 <b>Firmware Image Download</b> command。
+                <div class="reasoning-path">FwDownload + firmware file + transfer length → Firmware Image Download</div>
+              </div>
+              <ul class="tree">
+                <li><span class="unknown-field">FILE: FW/CA.bin</span> <span class="tag infer">Payload source</span></li>
+              </ul>
+              <div class="reasoning">
+                <b>Agent 推斷</b><br>
+                <code>FILE</code> 是 test platform 用來指定 firmware 檔案的來源，其檔案內容應成為 Firmware Image Download command 的 data payload。
+              </div>
+              <ul class="tree">
+                <li><span class="unknown-field">TXLEN: 20000 / 40000 / 80000 / 100000 / 200000</span> <span class="tag infer">Field translation</span></li>
+              </ul>
+              <div class="reasoning">
+                <b>Agent 推斷</b><br>
+                <code>TXLEN</code> 應為 test platform 定義的 transfer length。由 <code>20000</code> 對應 128 KiB 的來源描述，推斷數值採 hexadecimal byte length，再轉換為 SPEC 使用的 <code>OFST</code> 與 <code>NUMD</code>。
+                <span class="formula">OFST = image_offset_bytes / 4</span>
+                <span class="formula">NUMD = transfer_size_bytes / 4 - 1</span>
+              </div>
+              <div class="spec-fact">
+                <b>SPEC 連接</b><br>
+                Firmware Image Download 使用 <code>OFST</code> 表示 image offset，使用 <code>NUMD</code> 表示本次傳輸的 DWORD 數量減一。
+              </div>
+              <div class="spec-index">
+                <div class="spec-index-title">SPEC Index</div>
+                <table class="index-table">
+                  <thead><tr><th>Evidence</th><th>SPEC Location</th><th>Supports</th></tr></thead>
+                  <tbody>
+                    <tr><td>SPEC-FWDL-001</td><td>NVMe Base Specification 2.0, Section 5.13</td><td>Firmware Image Download command purpose and behavior</td></tr>
+                    <tr><td>SPEC-FWDL-002</td><td>NVMe Base Specification 2.0, Figures 184–187</td><td>Command format, <code>OFST</code> and <code>NUMD</code></td></tr>
+                  </tbody>
+                </table>
+              </div>
+              </div>
+              </details>
+            </li>
+
+            <li class="flow-node">
+              <span class="node-index">03</span>
+              <details class="node-details">
+              <summary class="node-title">
+                <h3>Wait Commands</h3>
+                <span class="tag nonspec">Non-SPEC Behavior</span>
+              </summary>
+              <div class="node-content">
+              <ul class="tree">
+                <li>CMD: <code>SLEEP</code></li>
+                <li>TIME: <code>2 seconds</code></li>
+              </ul>
+              <div class="no-spec">
+                <b>Agent 解讀</b><br>
+                這是 test platform 加入的 timing behavior，不是 NVMe command 或 SPEC field。來源沒有說明固定等待兩秒是在等待非同步處理、平台穩定，或只是 legacy test behavior。
+              </div>
+              <div class="spec-index">
+                <div class="spec-index-title">SPEC Index</div>
+                <table class="index-table">
+                  <thead><tr><th>SPEC Reference</th><th>Result</th></tr></thead>
+                  <tbody><tr><td>Direct SPEC reference</td><td>None. <code>SLEEP</code> and <code>TIME</code> are interpreted as test-platform timing behavior.</td></tr></tbody>
+                </table>
+              </div>
+              </div>
+              </details>
+            </li>
+
+            <li class="flow-node">
+              <span class="node-index">04</span>
+              <details class="node-details">
+              <summary class="node-title">
+                <h3>Firmware Commit</h3>
+                <span class="tag spec">SPEC Command</span>
+              </summary>
+              <div class="node-content">
+              <ul class="tree">
+                <li><span class="unknown-field">CMD: FwCommit</span> <span class="tag infer">Command mapping</span></li>
+              </ul>
+              <div class="reasoning">
+                <b>Agent 推斷</b><br>
+                根據來源同時提供 <code>CA</code> 與 <code>FS</code>，推斷 <code>FwCommit</code> 對應 SPEC 的 <b>Firmware Commit</b> command。
+                <div class="reasoning-path">FwCommit + CA + FS → Firmware Commit</div>
+              </div>
+              <ul class="tree">
+                <li>CA: <code>0</code> <span class="tag spec">SPEC Field</span></li>
+              </ul>
+              <div class="spec-fact">
+                <b>SPEC 連接</b><br>
+                Commit Action <code>0</code> 表示將已下載的 firmware image 寫入指定 firmware slot，不要求立即 activation。
+              </div>
+              <ul class="tree">
+                <li>FS: <code>1 or 2</code> <span class="tag spec">SPEC Field</span></li>
+              </ul>
+              <div class="spec-fact">
+                <b>SPEC 連接</b><br>
+                Firmware Slot 欄位指定下載完成的 firmware image 要寫入的目標 slot。
+              </div>
+              <div class="spec-index">
+                <div class="spec-index-title">SPEC Index</div>
+                <table class="index-table">
+                  <thead><tr><th>Evidence</th><th>SPEC Location</th><th>Supports</th></tr></thead>
+                  <tbody>
+                    <tr><td>SPEC-FWCMT-001</td><td>NVMe Base Specification 2.0, Section 5.12</td><td>Firmware Commit command purpose and behavior</td></tr>
+                    <tr><td>SPEC-FWCMT-002</td><td>NVMe Base Specification 2.0, Figures 181–183</td><td>Commit Action (<code>CA</code>) and Firmware Slot (<code>FS</code>) fields</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              </div>
+              </details>
+            </li>
+          </ol>
+        </div>
+      </details>
+    </section>
+
+    <footer>FWUpdateCA0 · SPEC Reasoning Map</footer>
+  </main>
+
+  <script id="spec-reasoning-map-data" type="application/json">
+  {
+    "report_contract": "spec_reasoning_map_v1",
+    "schema_version": "1.0",
+    "test_case_name": "FWUpdateCA0",
+    "source": "FWUpdateCA0.csv",
+    "manifest": "FWUpdateCA0_csv_test_flow/manifest.yaml",
+    "behaviors": [
+      {
+        "behavior_id": "BEH-001",
+        "flow_step_ids": [1],
+        "source_refs": ["CSV row 2"],
+        "behavior_name": "Environment Preparation",
+        "source_items": ["PreTest"],
+        "spec_command": {"name": "", "mapping": "none", "confidence": "unable_to_infer"},
+        "spec_facts": [],
+        "inferences": [{"id": "INF-PRETEST-001", "interpretation": "Test-platform preparation behavior", "confidence": "low"}],
+        "spec_index": [{"direct_spec_reference": null, "reason": "PreTest is interpreted as test-platform preparation behavior."}]
+      },
+      {
+        "behavior_id": "BEH-002",
+        "flow_step_ids": [2, 5, 8, 11, 14, 17, 20, 23, 26, 29],
+        "source_refs": ["CSV rows 3, 6, 9, 12, 15, 18, 21, 24, 27, 30"],
+        "behavior_name": "Firmware Image Download",
+        "source_items": ["FwDownload", "FILE", "TXLEN"],
+        "spec_command": {"name": "Firmware Image Download", "mapping": "inferred", "confidence": "high"},
+        "spec_facts": [
+          {"evidence_id": "SPEC-FWDL-001", "statement": "Firmware Image Download command purpose and behavior", "specification": "NVMe Base Specification 2.0", "section": "5.13", "figures_tables": []},
+          {"evidence_id": "SPEC-FWDL-002", "statement": "OFST and NUMD command fields", "specification": "NVMe Base Specification 2.0", "section": "5.13", "figures_tables": ["Figures 184-187"]}
+        ],
+        "inferences": [{"id": "INF-FWDL-001", "interpretation": "TXLEN is a tool-level hexadecimal transfer length represented through OFST and NUMD", "confidence": "medium"}],
+        "spec_index": ["SPEC-FWDL-001", "SPEC-FWDL-002"]
+      },
+      {
+        "behavior_id": "BEH-003",
+        "flow_step_ids": [3, 6, 9, 12, 15, 18, 21, 24, 27, 30],
+        "source_refs": ["CSV rows 4, 7, 10, 13, 16, 19, 22, 25, 28, 31"],
+        "behavior_name": "Wait Commands",
+        "source_items": ["SLEEP", "TIME"],
+        "spec_command": {"name": "", "mapping": "none", "confidence": "high"},
+        "spec_facts": [],
+        "inferences": [{"id": "INF-WAIT-001", "interpretation": "Test-platform timing behavior", "confidence": "high"}],
+        "spec_index": [{"direct_spec_reference": null, "reason": "SLEEP and TIME are test-platform timing controls."}]
+      },
+      {
+        "behavior_id": "BEH-004",
+        "flow_step_ids": [4, 7, 10, 13, 16, 19, 22, 25, 28, 31],
+        "source_refs": ["CSV rows 5, 8, 11, 14, 17, 20, 23, 26, 29, 32"],
+        "behavior_name": "Firmware Commit",
+        "source_items": ["FwCommit", "CA", "FS"],
+        "spec_command": {"name": "Firmware Commit", "mapping": "inferred", "confidence": "high"},
+        "spec_facts": [
+          {"evidence_id": "SPEC-FWCMT-001", "statement": "Firmware Commit command purpose and behavior", "specification": "NVMe Base Specification 2.0", "section": "5.12", "figures_tables": []},
+          {"evidence_id": "SPEC-FWCMT-002", "statement": "Commit Action and Firmware Slot fields", "specification": "NVMe Base Specification 2.0", "section": "5.12", "figures_tables": ["Figures 181-183"]}
+        ],
+        "inferences": [{"id": "INF-FWCMT-001", "interpretation": "FwCommit with CA and FS maps to Firmware Commit", "confidence": "high"}],
+        "spec_index": ["SPEC-FWCMT-001", "SPEC-FWCMT-002"]
+      }
+    ]
+  }
+  </script>
+  <script>
+    const nodes = () => document.querySelectorAll("details.node-details");
+    document.getElementById("expand-all").addEventListener("click", () => {
+      nodes().forEach((node) => { node.open = true; });
+    });
+    document.getElementById("collapse-all").addEventListener("click", () => {
+      nodes().forEach((node) => { node.open = false; });
+    });
+  </script>
+</body>
+</html>
